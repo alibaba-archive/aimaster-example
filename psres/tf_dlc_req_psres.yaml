@@ -23,7 +23,7 @@ spec:
               env:
                 - name: REQUIREMENTS_DIR
                   value: /paitf-data
-              command: ["python3","/paitf-data/psres/dist_lr_estimator_dlc.py"]
+              command: ["/bin/sh", "-c", "prepare_dlc_environment && python3 /paitf-data/psres/dist_lr_estimator_dlc.py"]
               volumeMounts:
                 - mountPath: "/paitf-data"
                   name: paitf-aimaster-storage
@@ -40,8 +40,9 @@ spec:
             - name: tensorflow
               image: registry-vpc.cn-hangzhou.aliyuncs.com/pai-dlc/tensorflow-training:1.12.2PAI-cpu-py36-ubuntu16.04 
               imagePullPolicy: Always
-              command: ["python3","/paitf-data/psres/dist_lr_estimator_dlc.py"]
+              command: ["/bin/sh", "-c", "prepare_dlc_environment && python3 /paitf-data/psres/dist_lr_estimator_dlc.py"]
               env:
+                - name: REQUIREMENTS_DIR
                   value: /paitf-data
                 - name: FILES 
                   value: /paitf-data/psres/sample.csv
@@ -63,8 +64,10 @@ spec:
             - name: tensorflow
               image: registry-vpc.cn-hangzhou.aliyuncs.com/pai-dlc/tensorflow-training:1.12.2PAI-cpu-py36-ubuntu16.04 
               imagePullPolicy: Always
-              command: ["python3","/paitf-data/psres/dist_lr_estimator_dlc.py"]
+              command: ["/bin/sh", "-c", "prepare_dlc_environment && python3 /paitf-data/psres/dist_lr_estimator_dlc.py"]
               env:
+                - name: REQUIREMENTS_DIR
+                  value: /paitf-data
                 - name: FILES 
                   value: /paitf-data/psres/sample.csv
                 - name: CHECKPOINTDIR
