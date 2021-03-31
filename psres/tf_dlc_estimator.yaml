@@ -1,0 +1,70 @@
+apiVersion: "kubeflow.org/v1"
+kind: "TFJob"
+metadata:
+  name: "dist-mnist-aimaster-estimator"
+  namespace: "pai-dlc-user"
+  annotations:
+    psResourceAnalyze: "true"
+spec:
+  tfReplicaSpecs:
+    PS:
+      replicas: 0
+      restartPolicy: Always 
+      template:
+        spec:
+          volumes:
+            - name: paitf-aimaster-storage
+              persistentVolumeClaim:
+                claimName: paitf-aimaster
+          containers:
+            - name: tensorflow
+              image: registry-vpc.cn-hangzhou.aliyuncs.com/aimaster/paitf:cpu.112.3
+              imagePullPolicy: Always
+              command: ["python3","/paitf-data/psres/dist_lr_estimator_dlc.py"]
+              volumeMounts:
+                - mountPath: "/paitf-data"
+                  name: paitf-aimaster-storage
+    Chief:
+      replicas: 1
+      restartPolicy: OnFailure
+      template:
+        spec:
+          volumes:
+            - name: paitf-aimaster-storage
+              persistentVolumeClaim:
+                claimName: paitf-aimaster
+          containers:
+            - name: tensorflow
+              image: registry-vpc.cn-hangzhou.aliyuncs.com/aimaster/paitf:cpu.112.3
+              imagePullPolicy: Always
+              command: ["python3","/paitf-data/psres/dist_lr_estimator_dlc.py"]
+              env:
+                - name: FILES 
+                  value: /paitf-data/psres/sample.csv
+                - name: CHECKPOINTDIR
+                  value: /paitf-data/psres/models1
+              volumeMounts:
+                - mountPath: "/paitf-data"
+                  name: paitf-aimaster-storage
+    Worker:
+      replicas: 4
+      restartPolicy: OnFailure
+      template:
+        spec:
+          volumes:
+            - name: paitf-aimaster-storage
+              persistentVolumeClaim:
+                claimName: paitf-aimaster
+          containers:
+            - name: tensorflow
+              image: registry-vpc.cn-hangzhou.aliyuncs.com/aimaster/paitf:cpu.112.3
+              imagePullPolicy: Always
+              command: ["python3","/paitf-data/psres/dist_lr_estimator_dlc.py"]
+              env:
+                - name: FILES 
+                  value: /paitf-data/psres/sample.csv
+                - name: CHECKPOINTDIR
+                  value: /paitf-data/psres/models1
+              volumeMounts:
+                - mountPath: "/paitf-data"
+                  name: paitf-aimaster-storage
