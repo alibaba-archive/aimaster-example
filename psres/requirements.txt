@@ -1,0 +1,1 @@
+ http://oyjdev.oss-cn-zhangjiakou.aliyuncs.com/dlc-release/aimaster-1.0.0-cp36-cp36m-linux_x86_64.whl

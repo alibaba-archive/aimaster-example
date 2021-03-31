@@ -1,0 +1,77 @@
+apiVersion: "kubeflow.org/v1"
+kind: "TFJob"
+metadata:
+  name: "dist-mnist-aimaster-estimator"
+  namespace: "pai-dlc-user"
+  annotations:
+    psResourceAnalyze: "true"
+spec:
+  tfReplicaSpecs:
+    PS:
+      replicas: 0
+      restartPolicy: Always 
+      template:
+        spec:
+          volumes:
+            - name: paitf-aimaster-storage
+              persistentVolumeClaim:
+                claimName: paitf-aimaster
+          containers:
+            - name: tensorflow
+              image: registry-vpc.cn-hangzhou.aliyuncs.com/pai-dlc/tensorflow-training:1.12.2PAI-cpu-py36-ubuntu18.04 
+              imagePullPolicy: Always
+              env:
+                - name: REQUIREMENTS_DIR
+                  value: /paitf-data
+              command: ["/bin/sh", "-c", "prepare_dlc_environment && python3 /paitf-data/psres/dist_lr_estimator_dlc.py"]
+              volumeMounts:
+                - mountPath: "/paitf-data"
+                  name: paitf-aimaster-storage
+    Chief:
+      replicas: 1
+      restartPolicy: OnFailure
+      template:
+        spec:
+          volumes:
+            - name: paitf-aimaster-storage
+              persistentVolumeClaim:
+                claimName: paitf-aimaster
+          containers:
+            - name: tensorflow
+              image: registry-vpc.cn-hangzhou.aliyuncs.com/pai-dlc/tensorflow-training:1.12.2PAI-cpu-py36-ubuntu18.04 
+              imagePullPolicy: Always
+              command: ["/bin/sh", "-c", "prepare_dlc_environment && python3 /paitf-data/psres/dist_lr_estimator_dlc.py"]
+              env:
+                - name: REQUIREMENTS_DIR
+                  value: /paitf-data
+                - name: FILES 
+                  value: /paitf-data/psres/sample.csv
+                - name: CHECKPOINTDIR
+                  value: /paitf-data/psres/models1
+              volumeMounts:
+                - mountPath: "/paitf-data"
+                  name: paitf-aimaster-storage
+    Worker:
+      replicas: 4
+      restartPolicy: OnFailure
+      template:
+        spec:
+          volumes:
+            - name: paitf-aimaster-storage
+              persistentVolumeClaim:
+                claimName: paitf-aimaster
+          containers:
+            - name: tensorflow
+              image: registry-vpc.cn-hangzhou.aliyuncs.com/pai-dlc/tensorflow-training:1.12.2PAI-cpu-py36-ubuntu18.04 
+              imagePullPolicy: Always
+              command: ["/bin/sh", "-c", "prepare_dlc_environment && python3 /paitf-data/psres/dist_lr_estimator_dlc.py"]
+              env:
+                - name: REQUIREMENTS_DIR
+                  value: /paitf-data
+                - name: FILES 
+                  value: /paitf-data/psres/sample.csv
+                - name: CHECKPOINTDIR
+                  value: /paitf-data/psres/models1
+              volumeMounts:
+                - mountPath: "/paitf-data"
+                  name: paitf-aimaster-storage
